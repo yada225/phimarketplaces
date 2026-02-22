@@ -42,6 +42,14 @@ const ProductDetail = () => {
                   </li>
                 ))}
               </ul>
+              {product.keyIngredients && (
+                <div className="mt-6 p-4 rounded-lg bg-accent">
+                  <h3 className="text-sm font-heading font-semibold text-accent-foreground mb-1">
+                    {lang === "fr" ? "Ingrédients clés" : "Key Ingredients"}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{product.keyIngredients}</p>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>
