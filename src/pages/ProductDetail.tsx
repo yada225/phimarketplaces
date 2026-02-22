@@ -9,7 +9,7 @@ type ProductKey = typeof productKeys[number];
 
 const ProductDetail = () => {
   const { productId } = useParams<{ productId: string }>();
-  const { t } = useI18n();
+  const { lang, t } = useI18n();
 
   if (!productId || !productKeys.includes(productId as ProductKey)) {
     return <Navigate to=".." replace />;
