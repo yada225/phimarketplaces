@@ -58,8 +58,6 @@ export const en: Translations = {
       bv: "28 BV",
       keyIngredients: "Convolvulus pluricaulis",
     },
-      bv: "28 BV",
-    },
   },
   compensation: {
     title: "Compensation Plan",
