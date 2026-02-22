@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Heart, TrendingUp, Globe, ArrowRight } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
+import phiBrand from "@/assets/phi-brand.png";
+import { productImages } from "@/lib/productImages";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -117,8 +119,8 @@ const Home = () => {
                   transition={{ delay: i * 0.1 }}
                   className="rounded-xl border border-border bg-card p-6 text-left hover:shadow-lg transition-shadow"
                 >
-                  <div className="w-full h-40 rounded-lg bg-muted flex items-center justify-center mb-4">
-                    <span className="text-2xl font-heading font-bold text-gradient">{product.name}</span>
+                  <div className="w-full h-48 rounded-lg overflow-hidden mb-4">
+                    <img src={productImages[key]} alt={product.name} className="w-full h-full object-cover" />
                   </div>
                   <h3 className="font-heading font-semibold text-foreground">{product.name}</h3>
                   <p className="text-sm text-muted-foreground mt-1">{product.shortDesc}</p>
