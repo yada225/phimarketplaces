@@ -2,6 +2,7 @@ import { useI18n } from "@/i18n";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { productImages } from "@/lib/productImages";
 
 const Products = () => {
   const { lang, t } = useI18n();
@@ -26,8 +27,8 @@ const Products = () => {
                 transition={{ delay: i * 0.15 }}
                 className="rounded-xl border border-border bg-card overflow-hidden hover:shadow-lg transition-shadow"
               >
-                <div className="h-48 bg-muted flex items-center justify-center">
-                  <span className="text-3xl font-heading font-bold text-gradient">{p.name}</span>
+                <div className="h-64 overflow-hidden">
+                  <img src={productImages[key]} alt={p.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="p-6">
                   <h2 className="text-xl font-heading font-bold text-foreground">{p.name}</h2>
