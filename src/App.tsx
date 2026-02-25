@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { CountryProvider } from "@/hooks/use-country";
 import LangLayout from "@/components/LangLayout";
 import Home from "@/pages/Home";
 import Products from "@/pages/Products";
@@ -18,26 +19,28 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Navigate to="/fr" replace />} />
-          <Route path="/:lang" element={<LangLayout />}>
-            <Route index element={<Home />} />
-            <Route path="products" element={<Products />} />
-            <Route path="products/:productId" element={<ProductDetail />} />
-            <Route path="compensation" element={<CompensationPlan />} />
-            <Route path="kits" element={<Kits />} />
-            <Route path="shops" element={<ShopPlans />} />
-            <Route path="testimonials" element={<Testimonials />} />
-            <Route path="contact" element={<Contact />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <CountryProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Navigate to="/fr" replace />} />
+            <Route path="/:lang" element={<LangLayout />}>
+              <Route index element={<Home />} />
+              <Route path="products" element={<Products />} />
+              <Route path="products/:productId" element={<ProductDetail />} />
+              <Route path="compensation" element={<CompensationPlan />} />
+              <Route path="kits" element={<Kits />} />
+              <Route path="shops" element={<ShopPlans />} />
+              <Route path="testimonials" element={<Testimonials />} />
+              <Route path="contact" element={<Contact />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </CountryProvider>
   </QueryClientProvider>
 );
 
