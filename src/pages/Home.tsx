@@ -5,6 +5,8 @@ import { Heart, TrendingUp, Globe, ArrowRight } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import phiBrand from "@/assets/phi-brand.png";
 import { productImages } from "@/lib/productImages";
+import { getProductPrice } from "@/lib/pricing";
+import { useCountry } from "@/hooks/use-country";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -13,6 +15,7 @@ const fadeUp = {
 
 const Home = () => {
   const { lang, t } = useI18n();
+  const { country } = useCountry();
 
   const missionCards = [
     { icon: Heart, title: t.mission.card1Title, desc: t.mission.card1Desc },
@@ -125,7 +128,12 @@ const Home = () => {
                   <h3 className="font-heading font-semibold text-foreground">{product.name}</h3>
                   <p className="text-sm text-muted-foreground mt-1">{product.shortDesc}</p>
                   <div className="flex items-center justify-between mt-4">
-                    <span className="font-semibold text-primary">{product.price}</span>
+                    <div>
+                      <span className="font-semibold text-primary">{getProductPrice(key, country).primary}</span>
+                      {getProductPrice(key, country).secondary && (
+                        <span className="block text-xs text-muted-foreground">{getProductPrice(key, country).secondary}</span>
+                      )}
+                    </div>
                     <Link
                       to={`/${lang}/products/${key}`}
                       className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1"
