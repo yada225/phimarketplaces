@@ -161,14 +161,8 @@ export const en: Translations = {
   kits: {
     title: "Kits & Membership",
     subtitle: "Choose the kit that matches your ambitions",
-    items: [
-      { name: "STARTER", price: "25,000 FCFA", bv: "30 BV", contents: "1 product + starter tools", recommended: false },
-      { name: "BASIC", price: "50,000 FCFA", bv: "65 BV", contents: "2 products + basic training", recommended: false },
-      { name: "PRO", price: "100,000 FCFA", bv: "140 BV", contents: "4 products + advanced training", recommended: true },
-      { name: "PREMIUM", price: "200,000 FCFA", bv: "300 BV", contents: "8 products + personal mentoring", recommended: false },
-      { name: "KING", price: "500,000 FCFA", bv: "800 BV", contents: "20 products + complete VIP program", recommended: false },
-    ],
-    selectKit: "Select this Kit",
+    items: [] as { name: string; price: string; bv: string; contents: string; recommended: boolean }[],
+    selectKit: "Buy this Kit",
     mostPopular: "Most Popular",
   },
   shops: {

@@ -1,11 +1,13 @@
 import { useParams, Navigate } from "react-router-dom";
 import { useI18n } from "@/i18n";
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { Check, ShoppingCart } from "lucide-react";
 import { productImages } from "@/lib/productImages";
-import { getProductPrice } from "@/lib/pricing";
+import { getProductPrice, PRICING } from "@/lib/pricing";
 import { useCountry } from "@/hooks/use-country";
+import { useCart } from "@/hooks/use-cart";
 import CountrySelector from "@/components/CountrySelector";
+import { toast } from "sonner";
 
 const productKeys = [
   "completeDetox", "ovita", "vbh", "antica",
@@ -17,8 +19,9 @@ type ProductKey = typeof productKeys[number];
 
 const ProductDetail = () => {
   const { productId } = useParams<{ productId: string }>();
-  const { t } = useI18n();
+  const { lang, t } = useI18n();
   const { country } = useCountry();
+  const { addItem } = useCart();
 
   if (!productId || !productKeys.includes(productId as ProductKey)) {
     return <Navigate to=".." replace />;
@@ -30,6 +33,18 @@ const ProductDetail = () => {
   }
 
   const price = getProductPrice(productId, country);
+  const unitPrice = country === "CIV" ? PRICING[productId]?.CIV_FCFA : PRICING[productId]?.NG_PRIMARY_FCFA;
+
+  const handleAddToCart = () => {
+    addItem({
+      id: productId,
+      type: "product",
+      name: product.name,
+      unitPrice: unitPrice || 0,
+      bv: product.bv,
+    });
+    toast.success(lang === "fr" ? "Ajouté au panier !" : "Added to cart!");
+  };
 
   return (
     <section className="section-padding">
@@ -52,6 +67,15 @@ const ProductDetail = () => {
               {price.secondary && (
                 <p className="text-sm text-muted-foreground mt-1">{price.secondary}</p>
               )}
+
+              <button
+                onClick={handleAddToCart}
+                className="mt-5 inline-flex items-center gap-2 px-6 py-3 rounded-lg orange-gradient text-primary-foreground font-semibold hover:opacity-90 transition-opacity"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                {lang === "fr" ? "Ajouter au panier" : "Add to Cart"}
+              </button>
+
               <ul className="mt-6 space-y-3">
                 {product.benefits.map((b, i) => (
                   <li key={i} className="flex items-center gap-3 text-foreground">

@@ -2,6 +2,7 @@ import { Outlet, useParams, Navigate } from "react-router-dom";
 import { I18nContext, getTranslations, type Lang } from "@/i18n";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 const LangLayout = () => {
   const { lang } = useParams<{ lang: string }>();
@@ -21,6 +22,7 @@ const LangLayout = () => {
           <Outlet />
         </main>
         <Footer />
+        <WhatsAppButton />
       </div>
     </I18nContext.Provider>
   );

@@ -1,10 +1,11 @@
 import { useI18n } from "@/i18n";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ShoppingCart } from "lucide-react";
 import { productImages } from "@/lib/productImages";
-import { getProductPrice } from "@/lib/pricing";
+import { getProductPrice, PRICING } from "@/lib/pricing";
 import { useCountry } from "@/hooks/use-country";
+import { useCart } from "@/hooks/use-cart";
 import CountrySelector from "@/components/CountrySelector";
 import { useState } from "react";
 
@@ -23,6 +24,7 @@ type CategoryKey = typeof CATEGORY_KEYS[number];
 const Products = () => {
   const { lang, t } = useI18n();
   const { country } = useCountry();
+  const { addItem } = useCart();
   const [activeCategory, setActiveCategory] = useState<CategoryKey | "all">("all");
 
   const filteredKeys = activeCategory === "all"
@@ -32,6 +34,12 @@ const Products = () => {
         return typeof p === "object" && "category" in p && p.category === activeCategory;
       });
 
+  const getPrice = (key: string): number => {
+    const p = PRICING[key];
+    if (!p) return 0;
+    return country === "CIV" ? p.CIV_FCFA : p.NG_PRIMARY_FCFA;
+  };
+
   return (
     <section className="section-padding">
       <div className="container mx-auto">
@@ -40,12 +48,10 @@ const Products = () => {
           <p className="mt-3 text-muted-foreground">{t.products.subtitle}</p>
         </div>
 
-        {/* Country selector */}
         <div className="flex justify-center mb-6">
           <CountrySelector />
         </div>
 
-        {/* Category tabs */}
         <div className="flex flex-wrap justify-center gap-2 mb-10">
           <button
             onClick={() => setActiveCategory("all")}
@@ -104,13 +110,28 @@ const Products = () => {
                       )}
                       <span className="text-xs text-muted-foreground ml-2">{p.bv}</span>
                     </div>
-                    <Link
-                      to={`/${lang}/products/${key}`}
-                      className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-                    >
-                      {t.products.viewDetails}
-                      <ArrowRight className="w-3 h-3" />
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => addItem({
+                          id: key,
+                          type: "product",
+                          name: p.name,
+                          unitPrice: getPrice(key),
+                          bv: p.bv,
+                        })}
+                        className="p-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+                        title={lang === "fr" ? "Ajouter au panier" : "Add to cart"}
+                      >
+                        <ShoppingCart className="w-4 h-4" />
+                      </button>
+                      <Link
+                        to={`/${lang}/products/${key}`}
+                        className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                      >
+                        {t.products.viewDetails}
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </motion.div>
