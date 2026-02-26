@@ -159,14 +159,8 @@ export const fr = {
   kits: {
     title: "Kits & Adhésion",
     subtitle: "Choisissez le kit qui correspond à vos ambitions",
-    items: [
-      { name: "STARTER", price: "25 000 FCFA", bv: "30 BV", contents: "1 produit + outils de démarrage", recommended: false },
-      { name: "BASIC", price: "50 000 FCFA", bv: "65 BV", contents: "2 produits + formation de base", recommended: false },
-      { name: "PRO", price: "100 000 FCFA", bv: "140 BV", contents: "4 produits + formation avancée", recommended: true },
-      { name: "PREMIUM", price: "200 000 FCFA", bv: "300 BV", contents: "8 produits + mentorat personnalisé", recommended: false },
-      { name: "KING", price: "500 000 FCFA", bv: "800 BV", contents: "20 produits + programme VIP complet", recommended: false },
-    ],
-    selectKit: "Choisir ce Kit",
+    items: [] as { name: string; price: string; bv: string; contents: string; recommended: boolean }[],
+    selectKit: "Acheter ce Kit",
     mostPopular: "Le plus populaire",
   },
   shops: {

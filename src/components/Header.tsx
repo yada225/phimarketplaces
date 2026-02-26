@@ -1,10 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
 import { useI18n, type Lang } from "@/i18n";
+import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
-import { Menu, X, Globe } from "lucide-react";
+import { Menu, X, Globe, User } from "lucide-react";
+import CartIcon from "@/components/CartIcon";
 
 const Header = () => {
   const { lang, t } = useI18n();
+  const { user } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const otherLang: Lang = lang === "fr" ? "en" : "fr";
@@ -48,6 +51,26 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center gap-2">
+          <CartIcon />
+
+          {user ? (
+            <Link
+              to={`/${lang}/dashboard`}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+            >
+              <User className="w-4 h-4" />
+              {lang === "fr" ? "Mon espace" : "Dashboard"}
+            </Link>
+          ) : (
+            <Link
+              to={`/${lang}/auth`}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+            >
+              <User className="w-4 h-4" />
+              {lang === "fr" ? "Connexion" : "Sign In"}
+            </Link>
+          )}
+
           <Link
             to={switchPath}
             className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
