@@ -2,9 +2,10 @@ import { useI18n } from "@/i18n";
 import { useAuth } from "@/hooks/use-auth";
 import { Navigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, Package, Store, LogOut, Settings } from "lucide-react";
+import { User, Package, Store, LogOut, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { useAdmin } from "@/hooks/use-admin";
 
 interface Order {
   id: string;
@@ -18,6 +19,7 @@ interface Order {
 const Dashboard = () => {
   const { lang } = useI18n();
   const { user, loading, signOut } = useAuth();
+  const { isAdmin } = useAdmin();
   const isFr = lang === "fr";
   const [orders, setOrders] = useState<Order[]>([]);
 
@@ -52,6 +54,16 @@ const Dashboard = () => {
             {isFr ? "Déconnexion" : "Sign Out"}
           </button>
         </div>
+
+        {isAdmin && (
+          <Link
+            to={`/${lang}/admin`}
+            className="mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg orange-gradient text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity"
+          >
+            <Shield className="w-4 h-4" />
+            {isFr ? "Panneau Admin" : "Admin Panel"}
+          </Link>
+        )}
 
         <div className="grid md:grid-cols-3 gap-4 mb-8">
           <div className="p-5 rounded-xl border border-border bg-card">
