@@ -142,6 +142,153 @@ export type Database = {
         }
         Relationships: []
       }
+      receipts: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          file_url: string
+          id: string
+          otp_code: string | null
+          plan_type: string | null
+          receipt_type: string
+          reviewed_at: string | null
+          shop_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          file_url: string
+          id?: string
+          otp_code?: string | null
+          plan_type?: string | null
+          receipt_type?: string
+          reviewed_at?: string | null
+          shop_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          file_url?: string
+          id?: string
+          otp_code?: string | null
+          plan_type?: string | null
+          receipt_type?: string
+          reviewed_at?: string | null
+          shop_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipts_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop_order_items: {
+        Row: {
+          id: string
+          item_key: string
+          item_name: string
+          order_id: string
+          quantity: number
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          id?: string
+          item_key: string
+          item_name: string
+          order_id: string
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+        }
+        Update: {
+          id?: string
+          item_key?: string
+          item_name?: string
+          order_id?: string
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "shop_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop_orders: {
+        Row: {
+          city: string | null
+          country: string
+          created_at: string
+          currency_label: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          delivery_address: string | null
+          id: string
+          order_ref: string
+          shop_id: string
+          status: string
+          subtotal: number
+          total: number
+        }
+        Insert: {
+          city?: string | null
+          country?: string
+          created_at?: string
+          currency_label?: string
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          delivery_address?: string | null
+          id?: string
+          order_ref: string
+          shop_id: string
+          status?: string
+          subtotal?: number
+          total?: number
+        }
+        Update: {
+          city?: string | null
+          country?: string
+          created_at?: string
+          currency_label?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          delivery_address?: string | null
+          id?: string
+          order_ref?: string
+          shop_id?: string
+          status?: string
+          subtotal?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_orders_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shop_subscriptions: {
         Row: {
           expires_at: string | null
@@ -171,34 +318,55 @@ export type Database = {
       }
       shops: {
         Row: {
+          activated_at: string | null
           contact_info: string | null
           created_at: string
           id: string
           is_active: boolean
           logo_url: string | null
           name: string
+          payment_instructions: string | null
+          plan_status: string
+          plan_type: string | null
+          renewal_at: string | null
           slug: string
+          status: string
           user_id: string
+          whatsapp: string | null
         }
         Insert: {
+          activated_at?: string | null
           contact_info?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
           logo_url?: string | null
           name: string
+          payment_instructions?: string | null
+          plan_status?: string
+          plan_type?: string | null
+          renewal_at?: string | null
           slug: string
+          status?: string
           user_id: string
+          whatsapp?: string | null
         }
         Update: {
+          activated_at?: string | null
           contact_info?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
           logo_url?: string | null
           name?: string
+          payment_instructions?: string | null
+          plan_status?: string
+          plan_type?: string | null
+          renewal_at?: string | null
           slug?: string
+          status?: string
           user_id?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
