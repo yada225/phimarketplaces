@@ -1,11 +1,13 @@
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useNavigate } from "react-router-dom";
+import { useCountry } from "@/hooks/use-country";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { Check, Star, Lock, Upload, Loader2 } from "lucide-react";
-import { useState, useRef } from "react";
+import { Check, Star, Lock, Upload, Loader2, MessageCircle, Store } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { OFFICIAL_WHATSAPP } from "@/components/WhatsAppButton";
 
 const SHOP_PLANS = [
   {
@@ -40,13 +42,23 @@ const SHOP_PLANS = [
 const ShopPlans = () => {
   const { lang } = useI18n();
   const { user } = useAuth();
+  const { country } = useCountry();
   const navigate = useNavigate();
   const isFr = lang === "fr";
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [ownerWhatsApp, setOwnerWhatsApp] = useState("");
+  const [sponsorRef, setSponsorRef] = useState("");
   const [uploading, setUploading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [activeShopsCount, setActiveShopsCount] = useState(0);
+
+  useEffect(() => {
+    supabase.from("shops").select("id", { count: "exact", head: true }).eq("is_active", true).then(({ count }) => {
+      setActiveShopsCount(count || 0);
+    });
+  }, []);
 
   const handleChoosePlan = (planKey: string) => {
     if (!user) { navigate(`/${lang}/auth`); return; }
@@ -55,14 +67,16 @@ const ShopPlans = () => {
 
   const handleUploadReceipt = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0] || !user || !selectedPlan) return;
+    if (!ownerWhatsApp.trim()) {
+      alert(isFr ? "Le numéro WhatsApp est obligatoire" : "WhatsApp number is required");
+      return;
+    }
     setUploading(true);
 
     const file = e.target.files[0];
     const path = `${user.id}/${Date.now()}-${file.name}`;
 
-    const { data: uploadData, error: uploadErr } = await supabase.storage
-      .from("receipts")
-      .upload(path, file);
+    const { error: uploadErr } = await supabase.storage.from("receipts").upload(path, file);
 
     if (uploadErr) {
       alert(uploadErr.message);
@@ -82,6 +96,8 @@ const ShopPlans = () => {
       is_active: false,
       plan_type: selectedPlan,
       plan_status: "pending",
+      whatsapp: ownerWhatsApp.trim(),
+      sponsor_ref: sponsorRef.trim() || null,
     }).select("id").single();
 
     // Create receipt
@@ -93,6 +109,18 @@ const ShopPlans = () => {
       plan_type: selectedPlan,
       status: "pending",
     });
+
+    // Send WhatsApp to admin
+    const plan = SHOP_PLANS.find(p => p.key === selectedPlan);
+    let msg = `🏪 *Nouvelle demande de boutique PHI*\n\n`;
+    msg += `👤 ${user.email}\n`;
+    msg += `📋 Plan: ${selectedPlan?.toUpperCase()} (${plan?.price})\n`;
+    msg += `📞 WhatsApp: ${ownerWhatsApp}\n`;
+    msg += `🌍 Pays: ${country}\n`;
+    if (sponsorRef) msg += `🔗 Parrain: ${sponsorRef}\n`;
+    msg += `\n✅ Reçu envoyé. Merci de vérifier et activer.`;
+
+    window.open(`https://wa.me/${OFFICIAL_WHATSAPP}?text=${encodeURIComponent(msg)}`, "_blank");
 
     setUploading(false);
     setSubmitted(true);
@@ -108,12 +136,12 @@ const ShopPlans = () => {
               <Check className="w-8 h-8 text-green-600" />
             </div>
             <h2 className="text-2xl font-heading font-bold text-foreground mb-2">
-              {isFr ? "Reçu envoyé !" : "Receipt submitted!"}
+              {isFr ? "Demande envoyée !" : "Request submitted!"}
             </h2>
             <p className="text-muted-foreground">
               {isFr
-                ? "Un administrateur va vérifier votre paiement et activer votre boutique. Vous recevrez un code OTP de confirmation."
-                : "An administrator will verify your payment and activate your shop. You will receive a confirmation OTP code."}
+                ? "Un administrateur va vérifier votre paiement et activer votre boutique. Vous recevrez un code d'activation unique."
+                : "An administrator will verify your payment and activate your shop. You will receive a unique activation code."}
             </p>
             <Button className="mt-6" onClick={() => navigate(`/${lang}/dashboard`)}>
               {isFr ? "Retour au tableau de bord" : "Back to Dashboard"}
@@ -136,22 +164,50 @@ const ShopPlans = () => {
               ? "Choisissez un abonnement, envoyez votre reçu de paiement, et un administrateur activera votre boutique."
               : "Choose a subscription, upload your payment receipt, and an administrator will activate your shop."}
           </p>
+          {/* Active shops counter */}
+          <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent text-accent-foreground text-sm font-medium">
+            <Store className="w-4 h-4 text-primary" />
+            {activeShopsCount} {isFr ? "boutiques actives" : "active shops"}
+          </div>
         </div>
 
-        {/* Receipt upload modal */}
+        {/* Plan selection form */}
         {selectedPlan && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-            className="max-w-md mx-auto mb-10 p-6 rounded-xl border-2 border-primary bg-card">
-            <h3 className="font-heading font-bold text-foreground mb-2">
+            className="max-w-md mx-auto mb-10 p-6 rounded-xl border-2 border-primary bg-card space-y-4">
+            <h3 className="font-heading font-bold text-foreground">
               {isFr ? `Plan sélectionné : ${selectedPlan.toUpperCase()}` : `Selected plan: ${selectedPlan.toUpperCase()}`}
             </h3>
-            <p className="text-sm text-muted-foreground mb-4">
+
+            <div>
+              <label className="text-sm font-medium text-foreground">{isFr ? "Votre WhatsApp (obligatoire) *" : "Your WhatsApp (required) *"}</label>
+              <input
+                type="tel"
+                value={ownerWhatsApp}
+                onChange={e => setOwnerWhatsApp(e.target.value)}
+                placeholder="+234..."
+                className="mt-1 w-full px-4 py-2.5 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-foreground">{isFr ? "Code parrain (optionnel)" : "Referral code (optional)"}</label>
+              <input
+                type="text"
+                value={sponsorRef}
+                onChange={e => setSponsorRef(e.target.value)}
+                placeholder="PHI-XXXXX"
+                className="mt-1 w-full px-4 py-2.5 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+
+            <p className="text-sm text-muted-foreground">
               {isFr
                 ? "Envoyez votre preuve de paiement (capture d'écran ou photo du reçu)"
                 : "Upload your proof of payment (screenshot or receipt photo)"}
             </p>
             <input type="file" ref={fileRef} className="hidden" accept="image/*,.pdf" onChange={handleUploadReceipt} />
-            <Button onClick={() => fileRef.current?.click()} disabled={uploading} className="w-full">
+            <Button onClick={() => fileRef.current?.click()} disabled={uploading || !ownerWhatsApp.trim()} className="w-full">
               {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
               {uploading ? (isFr ? "Envoi en cours..." : "Uploading...") : (isFr ? "Envoyer le reçu" : "Upload Receipt")}
             </Button>
