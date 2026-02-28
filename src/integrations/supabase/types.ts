@@ -106,6 +106,36 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_receipts: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          file_url: string
+          id: string
+          order_id: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          file_url: string
+          id?: string
+          order_id: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          file_url?: string
+          id?: string
+          order_id?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -330,6 +360,7 @@ export type Database = {
           plan_type: string | null
           renewal_at: string | null
           slug: string
+          sponsor_ref: string | null
           status: string
           user_id: string
           whatsapp: string | null
@@ -347,6 +378,7 @@ export type Database = {
           plan_type?: string | null
           renewal_at?: string | null
           slug: string
+          sponsor_ref?: string | null
           status?: string
           user_id: string
           whatsapp?: string | null
@@ -364,6 +396,7 @@ export type Database = {
           plan_type?: string | null
           renewal_at?: string | null
           slug?: string
+          sponsor_ref?: string | null
           status?: string
           user_id?: string
           whatsapp?: string | null
