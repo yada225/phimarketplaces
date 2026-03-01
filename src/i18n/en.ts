@@ -196,8 +196,8 @@ export const en: Translations = {
     subjects: ["General information", "Join PHI", "Product order", "Technical support"],
     submit: "Send Message",
     info: {
-      email: "contact@phi-marketplaces.com",
-      phone: "+225 07 00 00 00 00",
+      email: "contact@phimarketplaces.com",
+      phone: "+234 0703 152 5681",
       address: "Abidjan, Côte d'Ivoire",
     },
   },
