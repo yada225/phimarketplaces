@@ -194,8 +194,8 @@ export const fr = {
     subjects: ["Information générale", "Rejoindre PHI", "Commande produit", "Support technique"],
     submit: "Envoyer le message",
     info: {
-      email: "contact@phi-marketplaces.com",
-      phone: "+225 07 00 00 00 00",
+      email: "contact@phimarketplaces.com",
+      phone: "+234 0703 152 5681",
       address: "Abidjan, Côte d'Ivoire",
     },
   },
