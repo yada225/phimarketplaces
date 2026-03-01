@@ -2,24 +2,40 @@ import { useI18n } from "@/i18n";
 import { useCart } from "@/hooks/use-cart";
 import { useCountry } from "@/hooks/use-country";
 import { useAuth } from "@/hooks/use-auth";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { formatFCFA } from "@/lib/pricing";
+import { formatFCFA, formatNGN, PRICING } from "@/lib/pricing";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { CreditCard, Truck, CheckCircle, MessageCircle, Upload, Loader2, ShieldCheck } from "lucide-react";
 import CountrySelector from "@/components/CountrySelector";
 import { OFFICIAL_WHATSAPP } from "@/components/WhatsAppButton";
 
-const generateRef = () => "PHI-" + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+function getCurrencyLabel(country: string): string {
+  if (country === "NG") return "NGN";
+  return "FCFA";
+}
 
-function buildWhatsAppMessage(orderRef: string, form: { name: string; email: string; phone: string; city: string; address: string }, items: { name: string; quantity: number; unitPrice: number }[], total: number, country: string) {
+function formatPrice(amount: number, country: string): string {
+  if (country === "NG") return formatNGN(amount);
+  return formatFCFA(amount);
+}
+
+function buildWhatsAppMessage(
+  orderRef: string,
+  form: { name: string; email: string; phone: string; city: string; address: string },
+  cartItems: { name: string; quantity: number; unitPrice: number }[],
+  total: number,
+  country: string
+) {
   let msg = `🛒 *Nouvelle commande PHI*\n\n`;
   msg += `📋 Réf: ${orderRef}\n`;
   msg += `👤 ${form.name}\n📧 ${form.email}\n📞 ${form.phone || "—"}\n🌍 ${country}\n🏙️ ${form.city || "—"}\n📍 ${form.address || "—"}\n\n`;
   msg += `*Articles:*\n`;
-  items.forEach(i => { msg += `• ${i.name} x${i.quantity} — ${formatFCFA(i.unitPrice * i.quantity)}\n`; });
-  msg += `\n💰 *Total: ${formatFCFA(total)}*\n\n`;
+  cartItems.forEach((i) => {
+    msg += `• ${i.name} x${i.quantity} — ${formatPrice(i.unitPrice * i.quantity, country)}\n`;
+  });
+  msg += `\n💰 *Total: ${formatPrice(total, country)}*\n\n`;
   msg += `Merci de confirmer cette commande.`;
   return encodeURIComponent(msg);
 }
@@ -31,6 +47,7 @@ const Checkout = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isFr = lang === "fr";
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({ name: "", email: "", phone: "", address: "", city: "" });
   const [loading, setLoading] = useState(false);
@@ -38,6 +55,10 @@ const Checkout = () => {
   const [orderSuccess, setOrderSuccess] = useState<{ ref: string; id: string } | null>(null);
   const [uploading, setUploading] = useState(false);
   const [receiptUploaded, setReceiptUploaded] = useState(false);
+
+  // Keep a snapshot of items for WhatsApp message after cart is cleared
+  const [savedItems, setSavedItems] = useState<typeof items>([]);
+  const [savedTotal, setSavedTotal] = useState(0);
 
   if (items.length === 0 && !orderSuccess) {
     navigate(`/${lang}/cart`);
@@ -56,13 +77,11 @@ const Checkout = () => {
     setLoading(true);
     setError("");
 
-    const orderRef = generateRef();
-    const currencyLabel = "FCFA";
+    const currencyLabel = getCurrencyLabel(country);
 
-    const { data: order, error: orderErr } = await supabase
-      .from("orders")
-      .insert({
-        order_ref: orderRef,
+    // Use security definer RPC to bypass RLS
+    const { data, error: rpcErr } = await supabase.rpc("create_order_with_items", {
+      payload: {
         user_id: user?.id || null,
         customer_name: form.name.trim(),
         customer_email: form.email.trim(),
@@ -73,36 +92,29 @@ const Checkout = () => {
         currency_label: currencyLabel,
         subtotal: total,
         total,
-        status: "pending_payment",
-      })
-      .select("id")
-      .single();
+        items: items.map((item) => ({
+          item_type: item.type,
+          item_key: item.id,
+          item_name: item.name,
+          quantity: item.quantity,
+          unit_price: item.unitPrice,
+          total_price: item.unitPrice * item.quantity,
+        })),
+      },
+    });
 
-    if (orderErr || !order) {
-      setError(orderErr?.message || "Error creating order");
+    if (rpcErr || !data) {
+      setError(rpcErr?.message || "Error creating order");
       setLoading(false);
       return;
     }
 
-    const orderItems = items.map((item) => ({
-      order_id: order.id,
-      item_type: item.type,
-      item_key: item.id,
-      item_name: item.name,
-      quantity: item.quantity,
-      unit_price: item.unitPrice,
-      total_price: item.unitPrice * item.quantity,
-    }));
-
-    const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
-
-    if (itemsErr) {
-      setError(itemsErr.message);
-      setLoading(false);
-      return;
-    }
-
-    setOrderSuccess({ ref: orderRef, id: order.id });
+    const result = data as { order_id: string; order_ref: string };
+    
+    // Save items snapshot before clearing cart
+    setSavedItems([...items]);
+    setSavedTotal(total);
+    setOrderSuccess({ ref: result.order_ref, id: result.order_id });
     clearCart();
     setLoading(false);
   };
@@ -130,22 +142,21 @@ const Checkout = () => {
       status: "pending",
     });
 
-    await supabase.from("orders").update({ status: "receipt_uploaded" }).eq("id", orderSuccess.id);
-
     setReceiptUploaded(true);
     setUploading(false);
   };
 
-  const whatsappUrl = orderSuccess
-    ? `https://wa.me/${OFFICIAL_WHATSAPP}?text=${buildWhatsAppMessage(orderSuccess.ref, form, items.length > 0 ? items : [], total, country)}`
+  const whatsappMessage = orderSuccess
+    ? buildWhatsAppMessage(orderSuccess.ref, form, savedItems.length > 0 ? savedItems : items, savedTotal || total, country)
     : "";
+  const whatsappUrl = `https://wa.me/${OFFICIAL_WHATSAPP}?text=${whatsappMessage}`;
 
   // ===== SUCCESS SCREEN =====
   if (orderSuccess) {
     return (
       <section className="section-padding">
-        <div className="container mx-auto max-w-lg text-center">
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="p-8 rounded-xl border border-border bg-card">
+        <div className="container mx-auto max-w-lg text-center px-4">
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="p-6 sm:p-8 rounded-xl border border-border bg-card">
             <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
@@ -164,25 +175,29 @@ const Checkout = () => {
             </p>
 
             {/* WhatsApp button */}
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => window.open(whatsappUrl, "_blank", "noopener")}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-[#25D366] text-white font-semibold hover:opacity-90 transition-opacity mb-4"
             >
               <MessageCircle className="w-5 h-5" />
               {isFr ? "Envoyer le panier sur WhatsApp" : "Send cart on WhatsApp"}
-            </a>
+            </button>
 
             {/* Receipt upload */}
             {!receiptUploaded ? (
-              <label className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border-2 border-dashed border-primary text-primary font-semibold cursor-pointer hover:bg-primary/5 transition-colors">
-                {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
-                {uploading
-                  ? (isFr ? "Envoi en cours..." : "Uploading...")
-                  : (isFr ? "Télécharger la preuve de paiement" : "Upload payment proof")}
-                <input type="file" className="hidden" accept="image/*,.pdf" onChange={handleUploadReceipt} disabled={uploading} />
-              </label>
+              <>
+                <input type="file" ref={fileRef} className="hidden" accept="image/*,.pdf" onChange={handleUploadReceipt} disabled={uploading} />
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border-2 border-dashed border-primary text-primary font-semibold cursor-pointer hover:bg-primary/5 transition-colors"
+                >
+                  {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
+                  {uploading
+                    ? (isFr ? "Envoi en cours..." : "Uploading...")
+                    : (isFr ? "Télécharger la preuve de paiement" : "Upload payment proof")}
+                </button>
+              </>
             ) : (
               <div className="p-3 rounded-lg bg-green-50 text-green-700 text-sm font-medium flex items-center justify-center gap-2">
                 <CheckCircle className="w-4 h-4" />
@@ -205,22 +220,22 @@ const Checkout = () => {
   // ===== CHECKOUT FORM =====
   return (
     <section className="section-padding">
-      <div className="container mx-auto max-w-3xl">
-        <h1 className="text-3xl font-heading font-bold text-foreground mb-2">
+      <div className="container mx-auto max-w-3xl px-4">
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground mb-2">
           {isFr ? "Finaliser la commande" : "Checkout"}
         </h1>
         <div className="flex justify-end mb-6">
           <CountrySelector />
         </div>
 
-        <div className="grid md:grid-cols-5 gap-8">
+        <div className="grid md:grid-cols-5 gap-6 sm:gap-8">
           <motion.form
             onSubmit={handleSubmit}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="md:col-span-3 space-y-4"
           >
-            <div className="p-5 rounded-xl border border-border bg-card space-y-4">
+            <div className="p-4 sm:p-5 rounded-xl border border-border bg-card space-y-4">
               <h2 className="font-heading font-semibold text-foreground flex items-center gap-2">
                 <Truck className="w-5 h-5 text-primary" />
                 {isFr ? "Informations de livraison" : "Delivery Information"}
@@ -256,7 +271,7 @@ const Checkout = () => {
               </div>
             </div>
 
-            <div className="p-5 rounded-xl border border-border bg-card">
+            <div className="p-4 sm:p-5 rounded-xl border border-border bg-card">
               <h2 className="font-heading font-semibold text-foreground flex items-center gap-2 mb-3">
                 <CreditCard className="w-5 h-5 text-primary" />
                 {isFr ? "Paiement" : "Payment"}
@@ -288,23 +303,23 @@ const Checkout = () => {
 
           {/* Order summary */}
           <div className="md:col-span-2">
-            <div className="p-5 rounded-xl border border-border bg-card sticky top-24">
+            <div className="p-4 sm:p-5 rounded-xl border border-border bg-card sticky top-24">
               <h2 className="font-heading font-semibold text-foreground mb-4">
                 {isFr ? "Résumé" : "Summary"}
               </h2>
               <div className="space-y-3">
                 {items.map((item) => (
-                  <div key={item.id} className="flex justify-between text-sm">
-                    <span className="text-foreground">
+                  <div key={item.id} className="flex justify-between text-sm gap-2">
+                    <span className="text-foreground truncate">
                       {item.name} <span className="text-muted-foreground">x{item.quantity}</span>
                     </span>
-                    <span className="font-medium text-foreground">{formatFCFA(item.unitPrice * item.quantity)}</span>
+                    <span className="font-medium text-foreground whitespace-nowrap">{formatPrice(item.unitPrice * item.quantity, country)}</span>
                   </div>
                 ))}
               </div>
               <div className="border-t border-border mt-4 pt-4 flex justify-between">
                 <span className="font-heading font-bold text-foreground">Total</span>
-                <span className="text-xl font-bold text-primary">{formatFCFA(total)}</span>
+                <span className="text-xl font-bold text-primary">{formatPrice(total, country)}</span>
               </div>
             </div>
           </div>
