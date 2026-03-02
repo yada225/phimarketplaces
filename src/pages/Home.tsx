@@ -2,7 +2,7 @@ import { useI18n } from "@/i18n";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Heart, TrendingUp, Globe, ArrowRight } from "lucide-react";
-import heroBg from "@/assets/hero-bg.jpg";
+import heroBg from "@/assets/phi-hero-products.png";
 import phiBrand from "@/assets/phi-brand.png";
 import { productImages } from "@/lib/productImages";
 import { getProductPrice } from "@/lib/pricing";
@@ -26,10 +26,10 @@ const Home = () => {
   return (
     <>
       {/* Hero */}
-      <section className="relative min-h-[85vh] flex items-center overflow-hidden">
+      <section className="relative min-h-[70vh] md:min-h-[85vh] flex items-center overflow-hidden">
         <div className="absolute inset-0">
-          <img src={heroBg} alt="PHI Health supplements" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 hero-gradient opacity-85" />
+          <img src={heroBg} alt="PHI Health supplements – Complete Detox, VBH+, Ovita" className="w-full h-full object-cover object-center" />
+          <div className="absolute inset-0 bg-black/65" />
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <motion.div
