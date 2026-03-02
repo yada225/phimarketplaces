@@ -2,10 +2,11 @@ import { useI18n } from "@/i18n";
 import { useAuth } from "@/hooks/use-auth";
 import { Navigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, Package, Store, LogOut, Shield } from "lucide-react";
+import { User, Package, Store, LogOut, Shield, Boxes } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useAdmin } from "@/hooks/use-admin";
+import OwnerStockTab from "@/components/dashboard/OwnerStockTab";
 
 interface Order {
   id: string;
@@ -16,12 +17,21 @@ interface Order {
   currency_label: string;
 }
 
+interface Shop {
+  id: string;
+  name: string;
+  slug: string;
+  is_active: boolean;
+}
+
 const Dashboard = () => {
   const { lang } = useI18n();
   const { user, loading, signOut } = useAuth();
   const { isAdmin } = useAdmin();
   const isFr = lang === "fr";
   const [orders, setOrders] = useState<Order[]>([]);
+  const [myShop, setMyShop] = useState<Shop | null>(null);
+  const [showStock, setShowStock] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -31,9 +41,15 @@ const Dashboard = () => {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(20)
-      .then(({ data }) => {
-        if (data) setOrders(data);
-      });
+      .then(({ data }) => { if (data) setOrders(data); });
+
+    supabase
+      .from("shops")
+      .select("id, name, slug, is_active")
+      .eq("user_id", user.id)
+      .limit(1)
+      .single()
+      .then(({ data }) => { if (data) setMyShop(data as Shop); });
   }, [user]);
 
   if (loading) return <div className="section-padding text-center text-muted-foreground">Loading...</div>;
@@ -82,6 +98,21 @@ const Dashboard = () => {
             <p className="text-sm text-muted-foreground mt-1">{isFr ? "Créer ou gérer" : "Create or manage"}</p>
           </Link>
         </div>
+
+        {/* Owner Stock Management */}
+        {myShop && myShop.is_active && (
+          <div className="mb-8">
+            <button
+              onClick={() => setShowStock(!showStock)}
+              className="flex items-center gap-2 mb-3 text-lg font-heading font-bold text-foreground hover:text-primary transition-colors"
+            >
+              <Boxes className="w-5 h-5" />
+              {isFr ? "Gestion du stock" : "Stock Management"}
+              <span className="text-xs text-muted-foreground ml-1">({myShop.name})</span>
+            </button>
+            {showStock && <OwnerStockTab isFr={isFr} shopId={myShop.id} />}
+          </div>
+        )}
 
         {/* Orders */}
         <h2 className="text-xl font-heading font-bold text-foreground mb-4">
