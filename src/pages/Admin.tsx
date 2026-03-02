@@ -511,6 +511,11 @@ const Admin = () => {
           </div>
         )}
 
+        {/* STOCK TAB */}
+        {tab === "stock" && (
+          <AdminStockTab isFr={isFr} shops={shops.map(s => ({ id: s.id, name: s.name }))} />
+        )}
+
         {/* RECEIPTS TAB */}
         {tab === "receipts" && (
           <div className="rounded-xl border border-border bg-card overflow-x-auto">
