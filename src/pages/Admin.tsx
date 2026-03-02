@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import {
   Shield, Package, Users, Store, Receipt, ChevronDown, ChevronUp,
   Download, BarChart3, DollarSign, ShoppingCart, Clock, Filter,
-  CheckCircle, XCircle, Eye, Pause, Play
+  CheckCircle, XCircle, Eye, Pause, Play, Boxes
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,8 +16,9 @@ import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from "@/components/ui/table";
 import { formatFCFA } from "@/lib/pricing";
+import AdminStockTab from "@/components/admin/AdminStockTab";
 
-type AdminTab = "overview" | "orders" | "shops" | "receipts" | "users";
+type AdminTab = "overview" | "orders" | "shops" | "receipts" | "users" | "stock";
 
 interface OrderRow {
   id: string; order_ref: string; customer_name: string; customer_email: string;
@@ -197,6 +198,7 @@ const Admin = () => {
     { key: "overview", icon: BarChart3, label: isFr ? "Vue globale" : "Overview" },
     { key: "orders", icon: Package, label: isFr ? "Commandes" : "Orders", count: orders.length },
     { key: "shops", icon: Store, label: isFr ? "Boutiques" : "Shops", count: shops.length },
+    { key: "stock", icon: Boxes, label: "Stock" },
     { key: "receipts", icon: Receipt, label: isFr ? "Reçus" : "Receipts", count: receipts.filter(r => r.status === "pending").length },
     { key: "users", icon: Users, label: isFr ? "Utilisateurs" : "Users", count: profiles.length },
   ];
@@ -507,6 +509,11 @@ const Admin = () => {
               );
             })()}
           </div>
+        )}
+
+        {/* STOCK TAB */}
+        {tab === "stock" && (
+          <AdminStockTab isFr={isFr} shops={shops.map(s => ({ id: s.id, name: s.name }))} />
         )}
 
         {/* RECEIPTS TAB */}

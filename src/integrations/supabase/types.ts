@@ -14,6 +14,88 @@ export type Database = {
   }
   public: {
     Tables: {
+      inventory_items: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          product_key: string
+          reorder_level: number
+          shop_id: string
+          sku: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          product_key: string
+          reorder_level?: number
+          shop_id: string
+          sku?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          product_key?: string
+          reorder_level?: number
+          shop_id?: string
+          sku?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_items_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_movements: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          movement_type: Database["public"]["Enums"]["inventory_movement_type"]
+          product_key: string
+          quantity: number
+          reference: string | null
+          shop_id: string
+          unit_cost: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          movement_type: Database["public"]["Enums"]["inventory_movement_type"]
+          product_key: string
+          quantity: number
+          reference?: string | null
+          shop_id: string
+          unit_cost?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          movement_type?: Database["public"]["Enums"]["inventory_movement_type"]
+          product_key?: string
+          quantity?: number
+          reference?: string | null
+          shop_id?: string
+          unit_cost?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_movements_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           id: string
@@ -64,6 +146,7 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone: string | null
+          deleted_at: string | null
           delivery_address: string | null
           id: string
           order_ref: string
@@ -80,6 +163,7 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone?: string | null
+          deleted_at?: string | null
           delivery_address?: string | null
           id?: string
           order_ref: string
@@ -96,6 +180,7 @@ export type Database = {
           customer_email?: string
           customer_name?: string
           customer_phone?: string | null
+          deleted_at?: string | null
           delivery_address?: string | null
           id?: string
           order_ref?: string
@@ -403,6 +488,76 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_replenishment_items: {
+        Row: {
+          id: string
+          product_key: string
+          quantity: number
+          replenishment_id: string
+          unit_cost: number
+        }
+        Insert: {
+          id?: string
+          product_key: string
+          quantity?: number
+          replenishment_id: string
+          unit_cost?: number
+        }
+        Update: {
+          id?: string
+          product_key?: string
+          quantity?: number
+          replenishment_id?: string
+          unit_cost?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_replenishment_items_replenishment_id_fkey"
+            columns: ["replenishment_id"]
+            isOneToOne: false
+            referencedRelation: "stock_replenishments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_replenishments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          shop_id: string
+          status: Database["public"]["Enums"]["replenishment_status"]
+          supplier_name: string | null
+          total_cost: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          shop_id: string
+          status?: Database["public"]["Enums"]["replenishment_status"]
+          supplier_name?: string | null
+          total_cost?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          shop_id?: string
+          status?: Database["public"]["Enums"]["replenishment_status"]
+          supplier_name?: string | null
+          total_cost?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_replenishments_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -427,6 +582,18 @@ export type Database = {
     }
     Functions: {
       create_order_with_items: { Args: { payload: Json }; Returns: Json }
+      get_shop_stock: {
+        Args: { p_shop_id: string }
+        Returns: {
+          current_stock: number
+          product_key: string
+          reorder_level: number
+        }[]
+      }
+      get_stock_level: {
+        Args: { p_product_key: string; p_shop_id: string }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -434,9 +601,26 @@ export type Database = {
         }
         Returns: boolean
       }
+      receive_replenishment: {
+        Args: { p_replenishment_id: string }
+        Returns: undefined
+      }
+      record_sale_movements: {
+        Args: { p_order_id: string; p_shop_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      inventory_movement_type:
+        | "INITIAL"
+        | "RESTOCK"
+        | "SALE"
+        | "ADJUSTMENT"
+        | "TRANSFER_IN"
+        | "TRANSFER_OUT"
+        | "RETURN"
+      replenishment_status: "DRAFT" | "RECEIVED" | "CANCELLED"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -565,6 +749,16 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      inventory_movement_type: [
+        "INITIAL",
+        "RESTOCK",
+        "SALE",
+        "ADJUSTMENT",
+        "TRANSFER_IN",
+        "TRANSFER_OUT",
+        "RETURN",
+      ],
+      replenishment_status: ["DRAFT", "RECEIVED", "CANCELLED"],
     },
   },
 } as const
