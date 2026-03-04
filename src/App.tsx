@@ -25,6 +25,14 @@ import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
+/** Redirect "/" to the language matching the detected country */
+const LangRedirect = () => {
+  const { country } = useCountry();
+  // CIV (Côte d'Ivoire) → French, NG (Nigeria) → English, OTHER → French default
+  const lang = country === "NG" ? "en" : "fr";
+  return <Navigate to={`/${lang}`} replace />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
