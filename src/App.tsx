@@ -35,7 +35,7 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Navigate to="/fr" replace />} />
+                <Route path="/" element={<LangRedirect />} />
                 <Route path="/:lang" element={<LangLayout />}>
                   <Route index element={<Home />} />
                   <Route path="products" element={<Products />} />
