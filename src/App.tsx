@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { CountryProvider } from "@/hooks/use-country";
+import { useCountry, CountryProvider } from "@/hooks/use-country";
 import { CartProvider } from "@/hooks/use-cart";
 import { AuthProvider } from "@/hooks/use-auth";
 import LangLayout from "@/components/LangLayout";
@@ -25,6 +25,14 @@ import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
+/** Redirect "/" to the language matching the detected country */
+const LangRedirect = () => {
+  const { country } = useCountry();
+  // CIV (Côte d'Ivoire) → French, NG (Nigeria) → English, OTHER → French default
+  const lang = country === "NG" ? "en" : "fr";
+  return <Navigate to={`/${lang}`} replace />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -35,7 +43,7 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Navigate to="/fr" replace />} />
+                <Route path="/" element={<LangRedirect />} />
                 <Route path="/:lang" element={<LangLayout />}>
                   <Route index element={<Home />} />
                   <Route path="products" element={<Products />} />

@@ -26,9 +26,10 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-secondary/95 backdrop-blur-md border-b border-border/30">
-      <div className="container mx-auto flex items-center justify-between h-16 px-4">
-        <Link to={`/${lang}`} className="flex items-center gap-2">
-          <span className="text-xl font-heading font-bold text-primary-foreground">
+      <div className="container mx-auto flex items-center justify-between h-16 px-4 min-w-0">
+        {/* Logo - shrinks on mobile */}
+        <Link to={`/${lang}`} className="flex items-center gap-2 shrink-0">
+          <span className="text-base sm:text-xl font-heading font-bold text-primary-foreground whitespace-nowrap">
             PHI<span className="text-primary"> & Marketplaces</span>
           </span>
         </Link>
@@ -50,33 +51,36 @@ const Header = () => {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        {/* Right actions - compact on mobile */}
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           <CartIcon />
 
+          {/* User link - icon only on mobile */}
           {user ? (
             <Link
               to={`/${lang}/dashboard`}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              className="flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 text-sm font-medium rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
             >
               <User className="w-4 h-4" />
-              {lang === "fr" ? "Mon espace" : "Dashboard"}
+              <span className="hidden sm:inline">{lang === "fr" ? "Mon espace" : "Dashboard"}</span>
             </Link>
           ) : (
             <Link
               to={`/${lang}/auth`}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              className="flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 text-sm font-medium rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
             >
               <User className="w-4 h-4" />
-              {lang === "fr" ? "Connexion" : "Sign In"}
+              <span className="hidden sm:inline">{lang === "fr" ? "Connexion" : "Sign In"}</span>
             </Link>
           )}
 
+          {/* Language switcher - always visible */}
           <Link
             to={switchPath}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+            className="flex items-center gap-1 p-2 sm:px-3 sm:py-1.5 text-sm font-medium rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
           >
             <Globe className="w-4 h-4" />
-            {otherLang.toUpperCase()}
+            <span className="text-xs sm:text-sm">{otherLang.toUpperCase()}</span>
           </Link>
 
           <button
