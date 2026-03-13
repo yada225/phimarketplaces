@@ -146,7 +146,12 @@ const Admin = () => {
   };
 
   const handleReceiptAction = async (receipt: ReceiptRow, action: "approved" | "rejected") => {
-    const otp = action === "approved" ? Math.random().toString(36).substring(2, 8).toUpperCase() : null;
+    let otp: string | null = null;
+    if (action === "approved") {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      const bytes = crypto.getRandomValues(new Uint8Array(6));
+      otp = Array.from(bytes).map(b => chars[b % chars.length]).join('');
+    }
     await supabase.from("receipts").update({
       status: action,
       otp_code: otp,
