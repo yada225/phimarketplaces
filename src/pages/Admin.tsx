@@ -273,7 +273,13 @@ const Admin = () => {
               </>
             )}
             {tab === "orders" && (
-              <Button variant="outline" onClick={exportCSV}><Download className="w-4 h-4 mr-2" />{isFr ? "Export CSV" : "Export CSV"}</Button>
+              <>
+                <Button variant="outline" onClick={exportCSV}><Download className="w-4 h-4 mr-2" />{isFr ? "Export CSV" : "Export CSV"}</Button>
+                <Button variant="destructive" onClick={clearPendingOrders}>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  {isFr ? "Vider les commandes en attente" : "Clear pending orders"}
+                </Button>
+              </>
             )}
           </div>
         )}
