@@ -84,8 +84,6 @@ const ShopPlans = () => {
       return;
     }
 
-    const { data: urlData } = supabase.storage.from("receipts").getPublicUrl(path);
-
     // Create shop in pending status
     const slug = `shop-${user.id.slice(0, 8)}-${Date.now().toString(36)}`;
     const { data: shopData } = await supabase.from("shops").insert({
@@ -105,7 +103,7 @@ const ShopPlans = () => {
       user_id: user.id,
       shop_id: shopData?.id || null,
       receipt_type: "subscription",
-      file_url: urlData.publicUrl,
+      file_url: path,
       plan_type: selectedPlan,
       status: "pending",
     });
