@@ -557,15 +557,21 @@ const Admin = () => {
                             <Button variant="ghost" size="sm" onClick={() => handleReceiptAction(r, "rejected")} title="Reject">
                               <XCircle className="w-4 h-4 text-destructive" />
                             </Button>
-                            <a href={r.file_url} target="_blank" rel="noopener noreferrer">
-                              <Button variant="ghost" size="sm" title="View"><Eye className="w-4 h-4" /></Button>
-                            </a>
+                            <Button variant="ghost" size="sm" title="View" onClick={async () => {
+                              const { data } = await supabase.storage.from("receipts").createSignedUrl(r.file_url, 300);
+                              if (data?.signedUrl) window.open(data.signedUrl, "_blank", "noopener");
+                            }}>
+                              <Eye className="w-4 h-4" />
+                            </Button>
                           </div>
                         )}
                         {r.status !== "pending" && (
-                          <a href={r.file_url} target="_blank" rel="noopener noreferrer">
-                            <Button variant="ghost" size="sm"><Eye className="w-4 h-4" /></Button>
-                          </a>
+                          <Button variant="ghost" size="sm" onClick={async () => {
+                            const { data } = await supabase.storage.from("receipts").createSignedUrl(r.file_url, 300);
+                            if (data?.signedUrl) window.open(data.signedUrl, "_blank", "noopener");
+                          }}>
+                            <Eye className="w-4 h-4" />
+                          </Button>
                         )}
                       </TableCell>
                     </TableRow>
