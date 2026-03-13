@@ -405,9 +405,12 @@ const Admin = () => {
                         </select>
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">{new Date(order.created_at).toLocaleDateString()}</TableCell>
-                      <TableCell>
+                      <TableCell className="flex items-center gap-1">
                         <Button variant="ghost" size="icon" onClick={() => toggleOrderItems(order.id)}>
                           {expandedOrder === order.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => deleteOrder(order.id)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </TableCell>
                     </TableRow>
