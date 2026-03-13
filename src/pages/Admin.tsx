@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import {
   Shield, Package, Users, Store, Receipt, ChevronDown, ChevronUp,
   Download, BarChart3, DollarSign, ShoppingCart, Clock, Filter,
-  CheckCircle, XCircle, Eye, Pause, Play, Boxes
+  CheckCircle, XCircle, Eye, Pause, Play, Boxes, Trash2, AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -127,6 +127,28 @@ const Admin = () => {
   const updateOrderStatus = async (orderId: string, status: string) => {
     await supabase.from("orders").update({ status }).eq("id", orderId);
     setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+  };
+
+  const deleteOrder = async (orderId: string) => {
+    if (!confirm(isFr ? "Supprimer définitivement cette commande ?" : "Permanently delete this order?")) return;
+    // Delete related records first (order_items, payment_receipts), then the order
+    await supabase.from("payment_receipts").delete().eq("order_id", orderId);
+    await supabase.from("order_items").delete().eq("order_id", orderId);
+    await supabase.from("orders").delete().eq("id", orderId);
+    setOrders(prev => prev.filter(o => o.id !== orderId));
+    setOrderItems(prev => { const copy = { ...prev }; delete copy[orderId]; return copy; });
+  };
+
+  const clearPendingOrders = async () => {
+    const pendingOrders = orders.filter(o => o.status === "pending" || o.status === "pending_payment");
+    if (pendingOrders.length === 0) return;
+    if (!confirm(isFr ? `Supprimer ${pendingOrders.length} commande(s) en attente ?` : `Delete ${pendingOrders.length} pending order(s)?`)) return;
+    for (const o of pendingOrders) {
+      await supabase.from("payment_receipts").delete().eq("order_id", o.id);
+      await supabase.from("order_items").delete().eq("order_id", o.id);
+      await supabase.from("orders").delete().eq("id", o.id);
+    }
+    setOrders(prev => prev.filter(o => o.status !== "pending" && o.status !== "pending_payment"));
   };
 
   const toggleOrderItems = async (orderId: string) => {
@@ -251,7 +273,13 @@ const Admin = () => {
               </>
             )}
             {tab === "orders" && (
-              <Button variant="outline" onClick={exportCSV}><Download className="w-4 h-4 mr-2" />{isFr ? "Export CSV" : "Export CSV"}</Button>
+              <>
+                <Button variant="outline" onClick={exportCSV}><Download className="w-4 h-4 mr-2" />{isFr ? "Export CSV" : "Export CSV"}</Button>
+                <Button variant="destructive" onClick={clearPendingOrders}>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  {isFr ? "Vider les commandes en attente" : "Clear pending orders"}
+                </Button>
+              </>
             )}
           </div>
         )}
@@ -377,9 +405,12 @@ const Admin = () => {
                         </select>
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">{new Date(order.created_at).toLocaleDateString()}</TableCell>
-                      <TableCell>
+                      <TableCell className="flex items-center gap-1">
                         <Button variant="ghost" size="icon" onClick={() => toggleOrderItems(order.id)}>
                           {expandedOrder === order.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => deleteOrder(order.id)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </TableCell>
                     </TableRow>
