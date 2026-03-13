@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import {
   Shield, Package, Users, Store, Receipt, ChevronDown, ChevronUp,
   Download, BarChart3, DollarSign, ShoppingCart, Clock, Filter,
-  CheckCircle, XCircle, Eye, Pause, Play, Boxes
+  CheckCircle, XCircle, Eye, Pause, Play, Boxes, Trash2, AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
