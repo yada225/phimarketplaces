@@ -140,15 +140,15 @@ const Admin = () => {
   };
 
   const clearPendingOrders = async () => {
-    const pendingIds = filteredOrders.filter(o => o.status === "pending" || o.status === "pending_payment").map(o => o.id);
-    if (pendingIds.length === 0) return;
-    if (!confirm(isFr ? `Supprimer ${pendingIds.length} commande(s) en attente ?` : `Delete ${pendingIds.length} pending order(s)?`)) return;
-    for (const id of pendingIds) {
-      await supabase.from("payment_receipts").delete().eq("order_id", id);
-      await supabase.from("order_items").delete().eq("order_id", id);
-      await supabase.from("orders").delete().eq("id", id);
+    const pendingOrders = orders.filter(o => o.status === "pending" || o.status === "pending_payment");
+    if (pendingOrders.length === 0) return;
+    if (!confirm(isFr ? `Supprimer ${pendingOrders.length} commande(s) en attente ?` : `Delete ${pendingOrders.length} pending order(s)?`)) return;
+    for (const o of pendingOrders) {
+      await supabase.from("payment_receipts").delete().eq("order_id", o.id);
+      await supabase.from("order_items").delete().eq("order_id", o.id);
+      await supabase.from("orders").delete().eq("id", o.id);
     }
-    setOrders(prev => prev.filter(o => !pendingIds.includes(o.id)));
+    setOrders(prev => prev.filter(o => o.status !== "pending" && o.status !== "pending_payment"));
   };
 
   const toggleOrderItems = async (orderId: string) => {
