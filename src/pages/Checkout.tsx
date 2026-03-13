@@ -133,12 +133,10 @@ const Checkout = () => {
       return;
     }
 
-    const { data: urlData } = supabase.storage.from("receipts").getPublicUrl(path);
-
     await supabase.from("payment_receipts").insert({
       order_id: orderSuccess.id,
       user_id: user?.id || null,
-      file_url: urlData.publicUrl,
+      file_url: path,
       status: "pending",
     });
 

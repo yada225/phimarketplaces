@@ -103,7 +103,7 @@ const ShopPlans = () => {
       user_id: user.id,
       shop_id: shopData?.id || null,
       receipt_type: "subscription",
-      file_url: urlData.publicUrl,
+      file_url: path,
       plan_type: selectedPlan,
       status: "pending",
     });
