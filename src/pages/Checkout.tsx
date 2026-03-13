@@ -82,7 +82,6 @@ const Checkout = () => {
     // Use security definer RPC to bypass RLS
     const { data, error: rpcErr } = await supabase.rpc("create_order_with_items", {
       payload: {
-        user_id: user?.id || null,
         customer_name: form.name.trim(),
         customer_email: form.email.trim(),
         customer_phone: form.phone.trim() || null,
