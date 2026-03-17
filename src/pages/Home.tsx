@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Heart, TrendingUp, Globe, ArrowRight } from "lucide-react";
 import heroBg from "@/assets/phi-hero-products.png";
-import phiBrand from "@/assets/phi-brand.png";
 import { productImages } from "@/lib/productImages";
 import { getProductPrice } from "@/lib/pricing";
 import { useCountry } from "@/hooks/use-country";
+import EventsSection from "@/components/EventsSection";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -104,6 +104,9 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Events */}
+      <EventsSection />
 
       {/* Products preview */}
       <section className="section-padding">
