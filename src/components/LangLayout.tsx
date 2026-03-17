@@ -1,6 +1,7 @@
 import { Outlet, useParams, Navigate } from "react-router-dom";
 import { I18nContext, getTranslations, type Lang } from "@/i18n";
 import Header from "@/components/Header";
+import FlashBanner from "@/components/FlashBanner";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
