@@ -199,6 +199,24 @@ export const fr = {
       address: "Abidjan, Côte d'Ivoire",
     },
   },
+  flash: {
+    headline: "🔥 Découvrez les événements PHI & les prochaines présentations !",
+    meetCta: "Rejoindre la présentation en direct →",
+    nextEvent: "📅 Prochain événement bientôt — Restez connectés !",
+  },
+  events: {
+    badge: "À venir",
+    title: "Événements PHI",
+    subtitle: "Ne manquez pas nos prochains événements et présentations",
+    meetTitle: "Présentation en direct – Plan d'affaire PHI",
+    meetDesc: "Rejoignez-nous en ligne pour découvrir les produits PHI, le plan de compensation et comment démarrer.",
+    meetCta: "Rejoindre la réunion",
+    items: [
+      { name: "Grand Lancement PHI Abidjan", date: "25 Avr 2026", desc: "Lancement officiel de PHI en Côte d'Ivoire avec présentation des produits et du plan d'affaire.", location: "Abidjan, CI", image: "" },
+      { name: "Webinaire Santé PHI", date: "10 Mai 2026", desc: "Webinaire sur la santé digestive et les bienfaits de nos compléments alimentaires.", location: "En ligne", image: "" },
+      { name: "PHI Business Bootcamp", date: "22 Mai 2026", desc: "Formation intensive pour les nouveaux partenaires sur le plan de compensation.", location: "Lagos, Nigeria", image: "" },
+    ],
+  },
   footer: {
     description: "Prakti Health International & Marketplaces - Votre partenaire santé et business en Afrique.",
     quickLinks: "Liens Rapides",
