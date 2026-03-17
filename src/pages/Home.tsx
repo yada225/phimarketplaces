@@ -105,6 +105,9 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Events */}
+      <EventsSection />
+
       {/* Products preview */}
       <section className="section-padding">
         <div className="container mx-auto text-center">

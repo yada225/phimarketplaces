@@ -18,6 +18,7 @@ const LangLayout = () => {
   return (
     <I18nContext.Provider value={{ lang: validLang, t }}>
       <div className="min-h-screen flex flex-col">
+        <FlashBanner />
         <Header />
         <main className="flex-1">
           <Outlet />
