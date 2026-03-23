@@ -2,6 +2,7 @@ import { useI18n } from "@/i18n";
 import { motion } from "framer-motion";
 import { CalendarDays, MapPin, Video, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import meetImage from "@/assets/phi-google-meet.jpeg";
 
 const MEET_LINK = "https://meet.google.com/ogo-xuwe-soy";
 
@@ -64,26 +65,29 @@ const EventsSection = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="rounded-xl border border-primary/30 bg-primary/10 p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 text-center md:text-left"
+          className="rounded-xl border border-primary/30 bg-primary/10 overflow-hidden flex flex-col md:flex-row items-stretch"
         >
-          <div className="w-14 h-14 rounded-full orange-gradient flex items-center justify-center shrink-0">
-            <Video className="w-7 h-7 text-primary-foreground" />
+          <div className="md:w-1/3 h-48 md:h-auto">
+            <img src={meetImage} alt="Grande Conférence PHI via Google Meet" className="w-full h-full object-cover" />
           </div>
-          <div className="flex-1">
-            <h3 className="font-heading font-bold text-xl">{events?.meetTitle ?? "Live Presentation – PHI Business Plan"}</h3>
-            <p className="text-sm text-secondary-foreground/60 mt-1">
-              {events?.meetDesc ?? "Join us online to discover PHI products, the compensation plan and how to get started."}
-            </p>
+          <div className="flex-1 p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+            <div className="flex-1">
+              <h3 className="font-heading font-bold text-xl">{events?.meetTitle ?? "Live Presentation – PHI Business Plan"}</h3>
+              <p className="text-sm text-secondary-foreground/60 mt-1">
+                {events?.meetDesc ?? "Join us online to discover PHI products, the compensation plan and how to get started."}
+              </p>
+              <p className="text-xs text-secondary-foreground/50 mt-2">📅 Chaque Dimanche — 20H00 GMT</p>
+            </div>
+            <a
+              href={MEET_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg orange-gradient text-primary-foreground font-semibold hover:opacity-90 transition-opacity shrink-0"
+            >
+              {events?.meetCta ?? "Join the meeting"}
+              <ArrowRight className="w-4 h-4" />
+            </a>
           </div>
-          <a
-            href={MEET_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg orange-gradient text-primary-foreground font-semibold hover:opacity-90 transition-opacity shrink-0"
-          >
-            {events?.meetCta ?? "Join the meeting"}
-            <ArrowRight className="w-4 h-4" />
-          </a>
         </motion.div>
       </div>
     </section>
