@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { CalendarDays, MapPin, Video, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const MEET_LINK = "https://meet.google.com/abc-defg-hij"; // TODO: replace with real link
+const MEET_LINK = "https://meet.google.com/ogo-xuwe-soy";
 
 const EventsSection = () => {
   const { lang, t } = useI18n();
