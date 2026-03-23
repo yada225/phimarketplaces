@@ -2,6 +2,7 @@ import { useI18n } from "@/i18n";
 import { motion } from "framer-motion";
 import { CalendarDays, MapPin, Video, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import meetImage from "@/assets/phi-google-meet.jpeg";
 
 const MEET_LINK = "https://meet.google.com/ogo-xuwe-soy";
 
