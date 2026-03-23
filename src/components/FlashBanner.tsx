@@ -3,7 +3,7 @@ import { X, Zap, Video } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { motion, AnimatePresence } from "framer-motion";
 
-const MEET_LINK = "https://meet.google.com/abc-defg-hij"; // TODO: replace with real link
+const MEET_LINK = "https://meet.google.com/ogo-xuwe-soy";
 
 const FlashBanner = () => {
   const [visible, setVisible] = useState(true);
